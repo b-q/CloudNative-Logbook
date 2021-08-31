@@ -167,14 +167,22 @@ kubectl edit deployment valkyrie-dev
 kubectl set image deployment valkyrie-dev backend=gcr.io/$PROJECT_ID/valkyrie-app:v0.0.2 frontend=gcr.io/$PROJECTID/valkyrie-app:v0.0.2
 ```
 
-## Task 6: Create a pipeline in Jenkins to deploy your app  ( no check => qwiklabs outgoing technical issue with jenkins) 
+## Task 6: Create a pipeline in Jenkins to deploy your app  
 This process of building the container and pushing to the container repository can be automated using Jenkins. There is a Jenkins deployment in your valkyrie-dev cluster - connect to Jenkins and configure a job to build when you push a change to the source code.
 Remember with Jenkins:
 - Get the password with 
 ```
-printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo.
+printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
 ```
 - Connect to the Jenkins console using the commands below (but make sure you don't have a running container docker ps; if you do, kill it):
+	
+```
+docker ps
+docker stop [container id]
+/** Optional */	
+docker rm [container id]
+```
+	
 ```
 export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/component=jenkins-master" -l "app.kubernetes.io/instance=cd" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward $POD_NAME 8080:8080 >> /dev/null &
@@ -191,6 +199,7 @@ When you are ready, manually trigger a build (the initial build will take some t
 
 Create a pipeline in Jenkins to deploy your app
 
+get your Jenkins admin account password :	
 ```
 printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
 ```
@@ -199,9 +208,7 @@ printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-passwor
 export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/component=jenkins-master" -l "app.kubernetes.io/instance=cd" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward $POD_NAME 8080:8080 >> /dev/null &
 ```
-	
 
-Install all google account service plugin from Jenkins plugins, reboot Jenkins
 
 
 In the Jenkins user interface, click Credentials in the left navigation.
@@ -227,16 +234,24 @@ Click Jenkins > New Item in the left navigation:
 - From the Credentials drop-down, select the name of the credentials you created when adding your service account in the previous steps.
 
 
-Open Jenkinsfile file in a text editor, and replace YOUR_PROJECT with your GCP project ID.
+In Cloud Shell : 
+	
+* Open Jenkinsfile file in a text editor, and replace YOUR_PROJECT with your GCP project ID.
 
-Open source/html.go file in a text editor, and change the color of headings from green to orange.
+* Open source/html.go file in a text editor, and change the color of headings from green to orange.
 
+	
 ```
-git config --global user.email $PROJECTID
-git config --global user.name $PROJECTID
+git config --global user.email $PROJECT_ID
+git config --global user.name $PROJECT_ID
 ```
 ```
 git add *
 git commit -m 'green to orange'
 git push origin master
 ```
+
+Manually trigger a project build in Jenkins
+	
+	
+	
